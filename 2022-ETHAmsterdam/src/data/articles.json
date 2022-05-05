@@ -1,0 +1,35 @@
+[
+	{
+		"cid": "10001",
+		"author": ["John Doe"],
+		"title": "Lorem Ipsum",
+		"date": "2020-05-14T04:00:00Z",
+		"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis lorem ut libero malesuada feugiat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis lorem ut libero malesuada feugiat.",
+		"owner": "John Doe",
+		"tags": ["tagdwe1", "tag2", "tafwedsg3"],
+		"references": [],
+		"allowed": ["Facebook"]
+	},
+	{
+		"cid": "10002",
+		"author": ["John Doe"],
+		"title": "Lorem Ipsum 2",
+		"date": "2020-08-14T04:00:00Z",
+		"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis lorem ut libero malesuada feugiat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis lorem ut libero malesuada feugiat.",
+		"owner": "John Doe",
+		"tags": ["tag1", "tag2"],
+		"references": ["10001"],
+		"allowed": ["Google"]
+	},
+	{
+		"cid": "10003",
+		"author": ["John Doe"],
+		"title": "Lorem Ipsum 3",
+		"date": "2020-08-14T04:00:00Z",
+		"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis lorem ut libero malesuada feugiat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis lorem ut libero malesuada feugiat.",
+		"owner": "John Doe",
+		"tags": ["tag1", "tag2"],
+		"references": ["10001"],
+		"allowed": ["Google"]
+	}
+]
