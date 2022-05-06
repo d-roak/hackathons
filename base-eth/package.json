@@ -19,8 +19,16 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "react-scripts test && hardhat test",
+    "eject": "react-scripts eject",
+		"accounts": "hardhat accounts",
+		"check": "hardhat check",
+		"clean": "hardhat clean",
+		"compile": "hardhat compile",
+		"console": "hardhat console",
+		"flatten": "hardhat flatten",
+		"node": "hardhat node",
+		"run": "hardhat run"
   },
   "eslintConfig": {
     "extends": [
