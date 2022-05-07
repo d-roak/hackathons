@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 
 contract CopyCat {
-    uint256 private nCopycats;
     mapping(address => uint256) private balances;
     mapping(address => address) private walletsToBeCopied;
 
@@ -13,7 +12,6 @@ contract CopyCat {
 
     constructor() payable {
         owner = msg.sender;
-        nCopycats = 0;
     }
 
     function deposit() public payable returns (uint256) {
