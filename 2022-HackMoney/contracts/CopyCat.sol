@@ -10,7 +10,7 @@ contract CopyCat {
     //owner to send fees to
     address private owner;
 
-    constructor() payable {
+    constructor() {
         owner = msg.sender;
     }
 
