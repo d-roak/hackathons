@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-contract CopyCat {
+contract Copycat {
     mapping(address => uint256) private balances;
     mapping(address => address) private walletsToBeCopied;
 
