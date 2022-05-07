@@ -75,7 +75,7 @@ function Header() {
 					direction={["column", "row", "row", "row"]}
 					pt={[4, 4, 0, 0]}
 				>
-					<Link to={"/"}><Text display="block">Home</Text></Link>
+					<Link to={"/"}><Text display="block">Dashboard</Text></Link>
 					{!active ? (
 						<Button onClick={onOpen}>Connect Wallet</Button>
 					) : (
