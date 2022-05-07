@@ -37,10 +37,10 @@ contract CopyCat {
     }
 
     function openPosition(address smartContractAddress, uint256 amount) public {
-
+        //TODO
     }
 
-    function closePosition(address smartContractAddress, uint amount) public {
-
+    function closePosition(address smartContractAddress, uint256 amount) public {
+        //TODO
     }
 }
