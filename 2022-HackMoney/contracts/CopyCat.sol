@@ -24,7 +24,7 @@ contract CopyCat {
     function withdraw(uint256 amount) public returns (uint256 newBalance) {
         require(amount <= balances[msg.sender], "Amount exceeds balance");
         balances[msg.sender] -= amount;
-        msg.sender.transfer(amount);
+        payable(msg.sender).transfer(amount);
         return balances[msg.sender];
     }
 
@@ -43,6 +43,6 @@ contract CopyCat {
     }
 
     function closePosition(address smartContractAddress, uint amount) public {
-        
+
     }
 }
