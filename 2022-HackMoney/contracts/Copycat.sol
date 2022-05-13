@@ -2,22 +2,30 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+import "./CopycatAAVE.sol";
+import "./CopycatUniswap.sol";
 
 contract Copycat {
+    CopycatUniswap uniswap;
+    CopycatAAVE aave;
+    uint256 private fee;
+    mapping(address => mapping(address => uint256)) feeBalance;
     mapping(address => mapping(address => uint256)) private balances;
     mapping(address => uint256) private nWalletsCopied;
     mapping(address => mapping(uint256 => address)) private walletsToBeCopied;
 
-    //owner to send fees to
-    address private owner;
-
-    constructor() {
-        owner = msg.sender;
+    constructor(uint256 _fee){
+        fee = _fee;
     }
 
     function deposit(address wallet) public payable returns (uint256) {
         balances[msg.sender][wallet] += msg.value;
         return balances[msg.sender][wallet];
+    }
+
+    function depositFee(address wallet) public payable returns  (uint256){
+        feeBalances[msg.sender][wallet] +=msg.value;
+        return feeBalances[msg.sender][wallet];
     }
 
     function withdraw(uint256 amount, address wallet) public returns (uint256) {
@@ -30,13 +38,31 @@ contract Copycat {
         return balances[msg.sender][wallet];
     }
 
+    function withdrawFee(uint256 amount, address wallet) public returns (uint256){
+        require(
+            amount <= feeBalances[msg.sender][wallet],
+            "Amount exceeds balance"
+        );
+        feeBalances[msg.sender][wallet] -= amount;
+        payable(msg.sender).transfer(amount);
+        return feeBalances[msg.sender][wallet];
+    }
+
     function balance(address wallet) public view returns (uint256) {
         return balances[msg.sender][wallet];
+    }
+
+    function feeBalance(address wallet) public view returns (uint256){
+        return feeBalances[msg.sender][wallet];
     }
 
     function addWalletToCopyCat(address wallet) public {
         walletsToBeCopied[msg.sender][nWalletsCopied[msg.sender]] = wallet;
         nWalletsCopied[msg.sender]++;
+    }
+
+    function getAddressBeingCopied() public view returns ( address[]){
+        return walletsToBeCopied[msg.sender];
     }
 
     function openPosition(address smartContractAddress, uint256 amount)
@@ -45,7 +71,13 @@ contract Copycat {
         //TODO
     }
 
-    function update(address copycat) public {}
+    function update(address copycat) public {
+        for (int256 i = 0; i < nWalletsCopied[copycat]; i++) {
+            if (aave.update(copycat, walletsToBeCopied[copycat][i])) {
+                payable(msg.sender).transfer(fee);
+            }
+        }
+    }
 
     function closePosition(address smartContractAddress)
         private
@@ -53,6 +85,4 @@ contract Copycat {
     {
         //TODO
     }
-
-
 }
