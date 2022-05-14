@@ -64,12 +64,6 @@ contract Copycat {
         return walletsToBeCopied[msg.sender];
     }
 
-    function openPosition(address smartContractAddress, uint256 amount)
-        private
-    {
-        //TODO
-    }
-
     function update(address copycat, address wallet) public {
         bool found = false;
         for (int256 i = 0; i < walletsToBeCopied[copycat].length; i++) {
@@ -84,10 +78,4 @@ contract Copycat {
         }
     }
 
-    function closePosition(address smartContractAddress)
-        private
-        returns (uint256)
-    {
-        //TODO
-    }
 }
