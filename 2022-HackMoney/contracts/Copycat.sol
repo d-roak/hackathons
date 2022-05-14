@@ -8,7 +8,8 @@ import "./CopycatUniswap.sol";
 contract Copycat {
     CopycatUniswap uniswap;
     CopycatAAVE aave;
-    uint256 private fee = 0.003;
+		// no floats 0.3% = 0.0003 = 3 * 10^-5 = 3 / 10^5
+    uint256 private fee = 3; 
     mapping(address => mapping(address => uint256)) feeBalances;
     mapping(address => mapping(address => uint256)) private balances;
     mapping(address => address[]) private walletsToBeCopied;
@@ -60,14 +61,14 @@ contract Copycat {
         walletsToBeCopied[msg.sender].push(wallet);
     }
 
-    function getAddressesBeingCopied() public view returns (address[]) {
+    function getAddressesBeingCopied() public view returns (address[] memory) {
         return walletsToBeCopied[msg.sender];
     }
 
     function updateAave(address copycat, address wallet, address token) public {
         bool found = false;
         //TODO do this with mapping
-        for (int256 i = 0; i < walletsToBeCopied[copycat].length; i++) {
+        for (uint256 i = 0; i < walletsToBeCopied[copycat].length; i++) {
             if (walletsToBeCopied[copycat][i] == wallet) {
                 found = true;
                 break;

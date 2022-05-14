@@ -3,11 +3,12 @@ pragma solidity >0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
-import {IPoolAddressesProvider, UserReserveData} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from "@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol";
+import {IUiPoolDataProviderV3} from '@aave/periphery-v3/contracts/misc/interfaces/IUiPoolDataProviderV3.sol';
 
 contract CopycatAAVE {
     IPool pool;
-		IPoolAddressesProvider poolAddressesProvider;
+		IUiPoolDataProviderV3 poolDataProvider;
 		mapping(address => mapping(address => mapping(address => uint256))) private prevTokenBalance;
 
     constructor() {}
@@ -18,9 +19,11 @@ contract CopycatAAVE {
         returns (bool)
     {
 			uint256 prevBalance = prevTokenBalance[copycat][wallet][token];
-			// provider and address
-			address poolProvider = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
-			IUserReserveData[] userReserveData = poolAddressesProvider.getUserReservesData(provider, wallet);
+			IPoolAddressesProvider poolProvider = pool.ADDRESSES_PROVIDER();
+			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
+			// no idea what is the second return value
+			uint256 u;
+			(userReserveData, u) = poolDataProvider.getUserReservesData(poolProvider, wallet);
 
 		}
 

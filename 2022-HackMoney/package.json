@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@aave/core-v3": "^1.13.1",
+    "@aave/periphery-v3": "^1.10.0",
     "@chakra-ui/icons": "^1.1.7",
     "@chakra-ui/react": "^1.8.8",
     "@chakra-ui/theme": "^1.14.1",
