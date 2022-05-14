@@ -9,7 +9,7 @@ import {IUiPoolDataProviderV3} from '@aave/periphery-v3/contracts/misc/interface
 contract CopycatAAVE {
     IPool pool;
 		IUiPoolDataProviderV3 poolDataProvider;
-		mapping(address => mapping(address => mapping(address => uint256))) private prevTokenBalance;
+		mapping(address => mapping(address => mapping(address => IUiPoolDataProviderV3.UserReserveData))) private prevUserReserveData;
 
     constructor() {}
 
@@ -18,12 +18,25 @@ contract CopycatAAVE {
         view
         returns (bool)
     {
-			uint256 prevBalance = prevTokenBalance[copycat][wallet][token];
 			IPoolAddressesProvider poolProvider = pool.ADDRESSES_PROVIDER();
 			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 			// no idea what is the second return value
 			uint256 u;
 			(userReserveData, u) = poolDataProvider.getUserReservesData(poolProvider, wallet);
+
+			if (userReserveData.length == 0) {
+				return false;
+			}
+
+			IUiPoolDataProviderV3.UserReserveData prevUserReserveData = prevTokenBalance[copycat][wallet][token];
+			IUiPoolDataProviderV3.UserReserveData newUserReserveData;
+			for (uint256 i = 0; i < userReserveData.length; i++) {
+				if (userReserveData[i].underlyingAsset.toString() == token.toString()) {
+					newUserReserveData = userReserveData[i];
+					break;
+				}
+			}
+
 
 		}
 
