@@ -6,6 +6,7 @@ import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
 
 contract CopycatAAVE {
     IPool pool;
+    
 
     constructor() {}
 
