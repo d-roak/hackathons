@@ -56,11 +56,11 @@ contract Copycat {
         return feeBalances[msg.sender][wallet];
     }
 
-    function addWalletToCopyCat(address wallet) public {
+    function addWalletToCopycat(address wallet) public {
         walletsToBeCopied[msg.sender].push(wallet);
     }
 
-    function getAddressBeingCopied() public view returns (address[]) {
+    function getAddressesBeingCopied() public view returns (address[]) {
         return walletsToBeCopied[msg.sender];
     }
 
@@ -79,5 +79,4 @@ contract Copycat {
             payable(msg.sender).transfer(fee); //TODO pay gas fees
         }
     }
-
 }
