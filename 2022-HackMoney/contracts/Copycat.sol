@@ -64,7 +64,7 @@ contract Copycat {
         return walletsToBeCopied[msg.sender];
     }
 
-    function update(address copycat, address wallet) public {
+    function updateAave(address copycat, address wallet, address token) public {
         bool found = false;
         //TODO do this with mapping
         for (int256 i = 0; i < walletsToBeCopied[copycat].length; i++) {
@@ -74,7 +74,8 @@ contract Copycat {
             }
         }
         require(found, "The address is not copying the wallet");
-        if (aave.update(copycat, wallet, balances[copycat][wallet])) {
+
+        if (aave.update(copycat, wallet, token, balances[copycat][wallet])) {
             payable(msg.sender).transfer(fee); //TODO pay gas fees
         }
     }

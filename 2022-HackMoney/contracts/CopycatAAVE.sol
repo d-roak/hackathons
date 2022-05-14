@@ -3,18 +3,22 @@ pragma solidity >0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
+import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 
 contract CopycatAAVE {
     IPool pool;
-    
+		IPoolAddressesProvider poolAddressesProvider;
+		mapping(address => mapping(address => mapping(address => uint256))) private prevTokenBalance;
 
     constructor() {}
 
-    function update(address copycat, address wallet, uint256 amount)
+    function update(address copycat, address wallet, address token, uint256 amount)
         public
         view
         returns (bool)
-    {}
+    {
+			uint256 prevBalance = prevTokenBalance[copycat][wallet][token];
+		}
 
     function withdraw(
         address asset,
