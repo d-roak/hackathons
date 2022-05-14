@@ -3,7 +3,7 @@ pragma solidity >0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
-import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
+import {IPoolAddressesProvider, UserReserveData} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 
 contract CopycatAAVE {
     IPool pool;
@@ -18,13 +18,17 @@ contract CopycatAAVE {
         returns (bool)
     {
 			uint256 prevBalance = prevTokenBalance[copycat][wallet][token];
+			// provider and address
+			address poolProvider = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
+			IUserReserveData[] userReserveData = poolAddressesProvider.getUserReservesData(provider, wallet);
+
 		}
 
     function withdraw(
         address asset,
         uint256 amount,
         address to
-    ) {
+    ) public {
         pool.withdraw(asset, amount, to);
     }
 
@@ -34,7 +38,7 @@ contract CopycatAAVE {
         uint256 interestRateMode,
         uint16 referralCode,
         address onBehalfOf
-    ) {
+    ) public {
         pool.borrow(asset, amount, interestRateMode, referralCode, onBehalfOf);
     }
 
@@ -43,7 +47,7 @@ contract CopycatAAVE {
         uint256 amount,
         uint256 rateMode,
         address onBehalfOf
-    ) {
+    ) public {
         pool.repay(asset, amount, rateMode, onBehalfOf);
     }
 
@@ -51,19 +55,19 @@ contract CopycatAAVE {
         address asset,
         uint256 amount,
         uint256 interestRateMode
-    ) {
+    ) public {
         pool.repayWithATokens(asset, amount, interestRateMode);
     }
 
-    function swapBorrowRateMode(address asset, uint256 rateMode) {
+    function swapBorrowRateMode(address asset, uint256 rateMode) public {
         pool.swapBorrowRateMode(asset, rateMode);
     }
 
-    function rebalanceStableBorrowRate(address asset, address user) {
+    function rebalanceStableBorrowRate(address asset, address user) public {
         pool.rebalanceStableBorrowRate(asset, user);
     }
 
-    function setUserUseReserveAsCollateral(address asset, bool useAsCollateral)
+    function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) public
     {
         pool.setUserUseReserveAsCollateral(asset, useAsCollateral);
     }

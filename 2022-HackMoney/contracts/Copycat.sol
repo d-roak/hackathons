@@ -9,7 +9,7 @@ contract Copycat {
     CopycatUniswap uniswap;
     CopycatAAVE aave;
     uint256 private fee = 0.003;
-    mapping(address => mapping(address => uint256)) feeBalance;
+    mapping(address => mapping(address => uint256)) feeBalances;
     mapping(address => mapping(address => uint256)) private balances;
     mapping(address => address[]) private walletsToBeCopied;
 
