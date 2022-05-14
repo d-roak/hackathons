@@ -44,7 +44,20 @@ contract CopycatUniswap {
       bytes calldata data
       ) internal {
 
+<<<<<<< HEAD
       pool.swap(recipient, zeroForOne, amountSpecified, sqrtPriceLimitX96, data);
+=======
+
+  constructor(){
+
+  }
+
+  function update(address copycat, address wallet, uint256 amount) public {
+
+  }
+
+  function doSomethingWithPool() public {
+>>>>>>> 57bb9b0b40e82f12133a715454d1276267d02d3d
 
   }
 }
