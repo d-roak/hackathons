@@ -72,6 +72,7 @@ contract Copycat {
 
     function update(address copycat, address wallet) public {
         bool found = false;
+        //TODO do this with mapping
         for (int256 i = 0; i < walletsToBeCopied[copycat].length; i++) {
             if (walletsToBeCopied[copycat][i] == wallet) {
                 found = true;
