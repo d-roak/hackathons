@@ -9,7 +9,11 @@ contract CopycatAAVE {
 
     constructor() {}
 
-    function update(address copycat, address wallet) public {}
+    function update(address copycat, address wallet, uint256 amount)
+        public
+        view
+        returns (bool)
+    {}
 
     function withdraw(
         address asset,
