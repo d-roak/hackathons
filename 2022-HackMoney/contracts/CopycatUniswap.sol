@@ -5,6 +5,15 @@ import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
 contract CopycatUniswap {
   IUniswapV3Pool pool;
 
+
+  constructor(){
+
+  }
+
+  function update(address copycat, address wallet, uint256 amount) public {
+
+  }
+
   function doSomethingWithPool() public {
 
   }

@@ -56,18 +56,12 @@ contract Copycat {
         return feeBalances[msg.sender][wallet];
     }
 
-    function addWalletToCopyCat(address wallet) public {
+    function addWalletToCopycat(address wallet) public {
         walletsToBeCopied[msg.sender].push(wallet);
     }
 
-    function getAddressBeingCopied() public view returns (address[]) {
+    function getAddressesBeingCopied() public view returns (address[]) {
         return walletsToBeCopied[msg.sender];
-    }
-
-    function openPosition(address smartContractAddress, uint256 amount)
-        private
-    {
-        //TODO
     }
 
     function update(address copycat, address wallet) public {
@@ -83,12 +77,5 @@ contract Copycat {
         if (aave.update(copycat, wallet, balances[copycat][wallet])) {
             payable(msg.sender).transfer(fee); //TODO pay gas fees
         }
-    }
-
-    function closePosition(address smartContractAddress)
-        private
-        returns (uint256)
-    {
-        //TODO
     }
 }
