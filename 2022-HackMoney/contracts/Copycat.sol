@@ -96,6 +96,7 @@ contract Copycat is KeeperCompatibleInterface {
                 //change smart contract to each copycat's smart contract
                 if(aave.upkeepNeeded(walletsToBeCopied[copycats[i]][j])){
                     upkeepNeeded = true;
+                    //missing token
                     return (upkeepNeeded, [copycats[i], walletsToBeCopied[copycats[i]][j]]);
                 }
             }
