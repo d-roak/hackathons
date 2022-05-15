@@ -4,7 +4,7 @@ pragma solidity >0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
 import {IPoolAddressesProvider} from "@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol";
-import {IUiPoolDataProviderV3} from '@aave/periphery-v3/contracts/misc/interfaces/IUiPoolDataProviderV3.sol';
+import {IUiPoolDataProviderV3} from "@aave/periphery-v3/contracts/misc/interfaces/IUiPoolDataProviderV3.sol";
 import {WalletBalanceProvider} from "@aave/periphery-v3/contracts/misc/WalletBalanceProvider.sol";
 
 contract CopycatAAVE {
@@ -14,12 +14,57 @@ contract CopycatAAVE {
 	mapping(address => mapping(address => uint256)) prevBalances;
 	mapping(address => mapping(address => IUiPoolDataProviderV3.UserReserveData)) private prevUserReserves;
 
-	constructor() {}
+    constructor() {}
+
+	function upkeepNeeded(address copied) public view returns (bool) {
+		IPoolAddressesProvider poolProvider = pool.ADDRESSES_PROVIDER();
+		IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
+		// no idea what is the second return value
+		uint256 u;
+		(userReserveData, u) = poolDataProvider.getUserReservesData(
+			poolProvider,
+			copied
+		);
+
+		if (userReserveData.length == 0) {
+			return false;
+		}
+
+		for (uint256 i = 0; i < userReserveData.length; i++) {
+			IUiPoolDataProviderV3.UserReserveData
+				memory prevUserReserveData = prevUserReserves[copied][
+					userReserveData[i].underlyingAsset
+				];
+			IUiPoolDataProviderV3.UserReserveData
+				memory newUserReserveData = userReserveData[i];
+
+			bool eqScaledAToken = prevUserReserveData.scaledATokenBalance ==
+				newUserReserveData.scaledATokenBalance;
+			bool eqCollateralEnabled = prevUserReserveData
+				.usageAsCollateralEnabledOnUser ==
+				newUserReserveData.usageAsCollateralEnabledOnUser;
+			bool eqVariableDebt = prevUserReserveData.scaledVariableDebt ==
+				newUserReserveData.scaledVariableDebt;
+			bool eqStableDebt = prevUserReserveData.principalStableDebt ==
+				newUserReserveData.principalStableDebt;
+
+			if (!(
+				eqScaledAToken &&
+				eqCollateralEnabled &&
+				eqVariableDebt &&
+				eqStableDebt
+			)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	function update(address copied, address token, uint256 balance)
-			public
-			payable
-			returns (bool)
+		public
+		payable
+		returns (bool)
 	{
 		IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 		// no idea what is the second return value
@@ -29,8 +74,9 @@ contract CopycatAAVE {
 		if (userReserveData.length == 0) {
 			return false;
 		}
-
-		IUiPoolDataProviderV3.UserReserveData memory prevUserReserveData = prevUserReserves[copied][token];
+				
+		IUiPoolDataProviderV3.UserReserveData
+			memory prevUserReserveData = prevUserReserves[copied][token];
 		IUiPoolDataProviderV3.UserReserveData memory newUserReserveData;
 		for (uint256 i = 0; i < userReserveData.length; i++) {
 			if (userReserveData[i].underlyingAsset == token) {
