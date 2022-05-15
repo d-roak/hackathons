@@ -11,20 +11,20 @@ contract CopycatAAVE {
 	IPool pool;
 	IUiPoolDataProviderV3 poolDataProvider;
 	WalletBalanceProvider walletBalanceProvider;
+	mapping(address => mapping(address => uint256)) prevBalances;
 	mapping(address => mapping(address => IUiPoolDataProviderV3.UserReserveData)) private prevUserReserves;
 
 	constructor() {}
 
-	function update(address copied, address token, uint256 available)
+	function update(address copied, address token, uint256 balance)
 			public
 			payable
 			returns (bool)
 	{
-		IPoolAddressesProvider poolProvider = pool.ADDRESSES_PROVIDER();
 		IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 		// no idea what is the second return value
 		uint256 u;
-		(userReserveData, u) = poolDataProvider.getUserReservesData(poolProvider, copied);
+		(userReserveData, u) = poolDataProvider.getUserReservesData(pool.ADDRESSES_PROVIDER(), copied);
 
 		if (userReserveData.length == 0) {
 			return false;
@@ -39,48 +39,55 @@ contract CopycatAAVE {
 			}
 		}
 
-		bool eqScaledAToken = prevUserReserveData.scaledATokenBalance == newUserReserveData.scaledATokenBalance;
-		bool eqCollateralEnabled = prevUserReserveData.usageAsCollateralEnabledOnUser == newUserReserveData.usageAsCollateralEnabledOnUser;
-		bool eqVariableDebt = prevUserReserveData.scaledVariableDebt == newUserReserveData.scaledVariableDebt;
-		bool eqStableDebt = prevUserReserveData.principalStableDebt == newUserReserveData.principalStableDebt;
-		
-		if(eqScaledAToken && eqCollateralEnabled && eqVariableDebt && eqStableDebt) {
+		IUiPoolDataProviderV3.UserReserveData memory walletReserveData;
+		(userReserveData, u) = poolDataProvider.getUserReservesData(pool.ADDRESSES_PROVIDER(), address(this));
+		for (uint256 i = 0; i < userReserveData.length; i++) {
+			if (userReserveData[i].underlyingAsset == token) {
+				walletReserveData = userReserveData[i];
+				break;
+			}
+		}
+
+		if (prevBalances[copied][token] == walletBalanceProvider.balanceOf(copied, token)
+			&& prevUserReserveData.scaledATokenBalance == newUserReserveData.scaledATokenBalance
+			&& prevUserReserveData.usageAsCollateralEnabledOnUser == newUserReserveData.usageAsCollateralEnabledOnUser
+			&& prevUserReserveData.scaledVariableDebt == newUserReserveData.scaledVariableDebt
+			&& prevUserReserveData.principalStableDebt == newUserReserveData.principalStableDebt) {
 			return false;
 		}
 
-		// TODO calculate amounts
-		uint256 totalCopycat = available + 1;
-		uint256 totalCopied = walletBalanceProvider.balanceOf(copied, token);
-		// + newUserReserveData.scaledATokenBalance;
-
-		if(!eqScaledAToken) {
-			if (prevUserReserveData.scaledATokenBalance > newUserReserveData.scaledATokenBalance) {
-				pool.withdraw(token, available, msg.sender);
-			} else {
-				pool.supply(token, available, msg.sender, 0);
-			}
+		// totalCopycat = balance + walletReserveData.scaledATokenBalance;
+		// totalCopied = walletBalanceProvider.balanceOf(copied, token) + newUserReserveData.scaledATokenBalance;
+		if (walletReserveData.scaledATokenBalance / (balance + walletReserveData.scaledATokenBalance)
+			> newUserReserveData.scaledATokenBalance / (walletBalanceProvider.balanceOf(copied, token) + newUserReserveData.scaledATokenBalance)) {
+			pool.withdraw(token, walletReserveData.scaledATokenBalance - balance * newUserReserveData.scaledATokenBalance / walletBalanceProvider.balanceOf(copied, token));
+		} else if (walletReserveData.scaledATokenBalance / (balance + walletReserveData.scaledATokenBalance)
+			< newUserReserveData.scaledATokenBalance / (walletBalanceProvider.balanceOf(copied, token) + newUserReserveData.scaledATokenBalance)) {
+			pool.supply(token, ((balance + walletReserveData.scaledATokenBalance) * newUserReserveData.scaledATokenBalance / (walletBalanceProvider.balanceOf(copied, token) + newUserReserveData.scaledATokenBalance)) - walletReserveData.scaledATokenBalance);
 		}
-		if(!eqCollateralEnabled) {
+
+		if(prevUserReserveData.usageAsCollateralEnabledOnUser != newUserReserveData.usageAsCollateralEnabledOnUser) {
 			pool.setUserUseReserveAsCollateral(token, newUserReserveData.usageAsCollateralEnabledOnUser);
 		}
 
+		// TODO check with oracle
 		// Stable: 1, Variable: 2
-		if(!eqVariableDebt) {
+		if(prevUserReserveData.scaledVariableDebt != newUserReserveData.scaledVariableDebt) {
 			if (prevUserReserveData.scaledVariableDebt > newUserReserveData.scaledVariableDebt) {
-				pool.repay(token, available, 2, msg.sender);
+				pool.repay(token, balance, 2, address(this));
 			} else {
-				pool.borrow(token, available, 2, 0, msg.sender);
+				pool.borrow(token, balance, 2, 0, address(this));
 			}
 		}
-		if(!eqStableDebt) {
+		if(prevUserReserveData.principalStableDebt == newUserReserveData.principalStableDebt) {
 			if (prevUserReserveData.principalStableDebt > newUserReserveData.principalStableDebt) {
-				pool.repay(token, available, 1, msg.sender);
+				pool.repay(token, balance, 1, address(this));
 			} else {
-				pool.borrow(token, available, 1, 0, msg.sender);
+				pool.borrow(token, balance, 1, 0, address(this));
 			}
 		}
 
-		prevUserReserves[copied][token] = newUserReserveData;
+		prevUserReserveData = newUserReserveData;
 		return true;
 	}
 }

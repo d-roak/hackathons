@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
 import "./CopycatAAVE.sol";
 import "./CopycatUniswap.sol";
 
@@ -76,7 +75,7 @@ contract Copycat {
         }
         require(found, "The address is not copying the wallet");
 
-        if (aave.update(copycat, wallet, token, balances[copycat][wallet])) {
+        if (aave.update(wallet, token, balances[copycat][wallet])) {
             payable(msg.sender).transfer(fee); //TODO pay gas fees
         }
     }
