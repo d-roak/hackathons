@@ -26,7 +26,7 @@ contract CopycatAAVE {
         
     }
 
-    function upkeepNeeded(address copied) public view returns (bool) {
+    function upkeepNeeded(address copied) public view returns (bool, address) {
         IPoolAddressesProvider poolProvider = pool.ADDRESSES_PROVIDER();
         IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
         // no idea what is the second return value
@@ -37,7 +37,7 @@ contract CopycatAAVE {
         );
 
         if (userReserveData.length == 0) {
-            return false;
+            return (false, address(0));
         }
 
         for (uint256 i = 0; i < userReserveData.length; i++) {
@@ -64,11 +64,11 @@ contract CopycatAAVE {
                     eqVariableDebt &&
                     eqStableDebt)
             ) {
-                return true;
+                return (true, userReserveData[i].underlyingAsset);
             }
         }
 
-        return false;
+        return (false, address(0));
     }
 
     function update(

@@ -13,7 +13,7 @@ contract Copycat is KeeperCompatibleInterface {
     mapping(address => mapping(address => uint256)) feeBalances;
     mapping(address => mapping(address => uint256)) private balances;
     mapping(address => address[]) private walletsToBeCopied;
-    mapping(address => address) private aavePositions;
+    mapping(address => CopycatAAVE) private aavePositions;
 
     constructor() {}
 
@@ -68,7 +68,7 @@ contract Copycat is KeeperCompatibleInterface {
             aavePositions[msg.sender] = new CopycatAAVE();
         }
 
-        CopycatAAVE(aavePositions[msg.sender]).addWallet(wallet);
+        aavePositions[msg.sender].addWallet(wallet);
         walletsToBeCopied[msg.sender].push(wallet);
     }
 
@@ -113,16 +113,18 @@ contract Copycat is KeeperCompatibleInterface {
         upkeepNeeded = false;
         for (uint256 i = 0; i < copycats.length; i++) {
             for (uint256 j = 0;j < walletsToBeCopied[copycats[i]].length;j++) {
-                if (aavePositions(copycats[i]).upkeepNeeded(walletsToBeCopied[copycats[i]][j])) {
-                upkeepNeeded = true;
-                //TODO missing token
-                return (upkeepNeeded,[copycats[i], walletsToBeCopied[copycats[i]][j]]);
+                (bool needed, address token) = aavePositions[copycats[i]].upkeepNeeded(walletsToBeCopied[copycats[i]][j]);
+                if (needed) {
+                    upkeepNeeded = true;
+                    performData = abi.encode([copycats[i], walletsToBeCopied[copycats[i]][j], token]);
+                    return (upkeepNeeded, performData);
                 }
             }
         }
     }
 
     function performUpkeep(bytes calldata performData) external override {
-        updateAave(performData[0], performData[1], performData[2]);
+        (address copycat, address wallet, address token)= abi.decode(performData, (address, address, address));
+        updateAave(copycat, wallet, token);
     }
 }
