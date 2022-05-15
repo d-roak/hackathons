@@ -8,6 +8,7 @@ import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 contract Copycat is KeeperCompatibleInterface {
     // no floats 0.3% = 0.0003 = 3 * 10^-5 = 3 / 10^5
     uint256 private fee = 3;
+    uint256 private maxGas = 1000;
     address[] private copycats;
     mapping(address => mapping(address => uint256)) feeBalances;
     mapping(address => mapping(address => uint256)) private balances;
@@ -17,13 +18,13 @@ contract Copycat is KeeperCompatibleInterface {
     constructor() {}
 
     function deposit(address wallet) public payable returns (uint256) {
-        //add require following
+        require(balances[msg.sender][wallet]>0, "You are not following this wallet");
         balances[msg.sender][wallet] += msg.value;
         return balances[msg.sender][wallet];
     }
 
     function depositFee(address wallet) public payable returns (uint256) {
-        //add require following
+        require(balances[msg.sender][wallet]>0, "You are not following this wallet");
         feeBalances[msg.sender][wallet] += msg.value;
         return feeBalances[msg.sender][wallet];
     }
@@ -52,17 +53,17 @@ contract Copycat is KeeperCompatibleInterface {
     }
 
     function balance(address wallet) public view returns (uint256) {
-        //add require following
+        require(balances[msg.sender][wallet]>0, "You are not following this wallet");
         return balances[msg.sender][wallet];
     }
 
     function feeBalance(address wallet) public view returns (uint256) {
-        //add require following
+        require(balances[msg.sender][wallet]>0, "You are not following this wallet");
         return feeBalances[msg.sender][wallet];
     }
 
     function addWalletToCopycat(address wallet) public {
-        //add require not following
+        require(balances[msg.sender][wallet]<=0, "You are already following this wallet");
         if (walletsToBeCopied[msg.sender].length == 0) {
             aavePositions[msg.sender] = new CopycatAAVE();
         }
@@ -79,7 +80,7 @@ contract Copycat is KeeperCompatibleInterface {
         address copycat,
         address wallet,
         address token
-    ) public view returns (bool success) {
+    ) private view returns (bool success) {
         bool found = false;
         //TODO do this with mapping
         for (uint256 i = 0; i < walletsToBeCopied[copycat].length; i++) {
@@ -88,15 +89,10 @@ contract Copycat is KeeperCompatibleInterface {
                 break;
             }
         }
-        require(found, "The address is not copying the wallet");
+        require(balances[copycat][wallet] > 0, "Provide amount to copy");
+        require(feeBalances[copycat][wallet] > gasleft(), "Provide amount to pay fees");
 
-        if (
-            aavePositions[copycat].update(
-                wallet,
-                token,
-                balances[copycat][wallet]
-            )
-        ) {
+        if (aavePositions[copycat].update(wallet,token,balances[copycat][wallet])) {
             payable(msg.sender).transfer(fee); //TODO pay gas fees
             return true;
         }
@@ -111,15 +107,20 @@ contract Copycat is KeeperCompatibleInterface {
     {
         upkeepNeeded = false;
         for (uint256 i = 0; i < copycats.length; i++) {
+            
             for (uint256 j = 0;j < walletsToBeCopied[copycats[i]].length;j++) {
-                (bool needed, address token) = aavePositions[copycats[i]].upkeepNeeded(walletsToBeCopied[copycats[i]][j]);
-                if (needed) {
-                    upkeepNeeded = true;
-                    performData = abi.encode([copycats[i], walletsToBeCopied[copycats[i]][j], token]);
-                    return (upkeepNeeded, performData);
+                if(feeBalances[copycats[i]][walletsToBeCopied[copycats[i]][j]] >= fee){
+                
+                    (bool needed, address token) = aavePositions[copycats[i]].upkeepNeeded(walletsToBeCopied[copycats[i]][j]);
+                    if (needed) {
+                        upkeepNeeded = true;
+                        performData = abi.encode([copycats[i], walletsToBeCopied[copycats[i]][j], token]);
+                        return (upkeepNeeded, performData);
+                    }
                 }
             }
         }
+        return (upkeepNeeded, abi.encode(address(0)));
     }
 
     function performUpkeep(bytes calldata performData) external override {
