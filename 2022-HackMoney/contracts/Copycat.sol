@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./CopycatAAVE.sol";
 import "./CopycatUniswap.sol";
+import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
 contract Copycat is KeeperCompatibleInterface {
     // no floats 0.3% = 0.0003 = 3 * 10^-5 = 3 / 10^5
@@ -12,7 +13,7 @@ contract Copycat is KeeperCompatibleInterface {
     mapping(address => mapping(address => uint256)) feeBalances;
     mapping(address => mapping(address => uint256)) private balances;
     mapping(address => address[]) private walletsToBeCopied;
-    mapping(address => CopycatAAVE) private aavePositions;
+    mapping(address => address) private aavePositions;
 
     constructor() {}
 
@@ -63,6 +64,11 @@ contract Copycat is KeeperCompatibleInterface {
 
     function addWalletToCopycat(address wallet) public {
         //add require not following
+        if (walletsToBeCopied[msg.sender].length == 0) {
+            aavePositions[msg.sender] = new CopycatAAVE();
+        }
+
+        CopycatAAVE(aavePositions[msg.sender]).addWallet(wallet);
         walletsToBeCopied[msg.sender].push(wallet);
     }
 
@@ -85,49 +91,38 @@ contract Copycat is KeeperCompatibleInterface {
         }
         require(found, "The address is not copying the wallet");
 
-        if (aave.update(wallet, token, balances[copycat][wallet])) {
+        if (
+            aavePositions[copycat].update(
+                wallet,
+                token,
+                balances[copycat][wallet]
+            )
+        ) {
             payable(msg.sender).transfer(fee); //TODO pay gas fees
             return true;
         }
         return false;
     }
 
-    function checkUpkeep(
-        bytes calldata /* checkData */
-    )
+    function checkUpkeep(bytes calldata checkData)
         external
         view
         override
-        returns (
-            bool upkeepNeeded,
-            bytes memory /* performData */
-        )
+        returns (bool upkeepNeeded, bytes memory performData)
     {
         upkeepNeeded = false;
-        address[] performData;
         for (uint256 i = 0; i < copycats.length; i++) {
-            for (
-                uint256 j = 0;
-                j < walletsToBeCopied[copycats[i]].length;
-                j++
-            ) {
-                //change smart contract to each copycat's smart contract
-                if (aave.upkeepNeeded(walletsToBeCopied[copycats[i]][j])) {
-                    upkeepNeeded = true;
-                    //missing token
-                    return (
-                        upkeepNeeded,
-                        [copycats[i], walletsToBeCopied[copycats[i]][j]]
-                    );
+            for (uint256 j = 0;j < walletsToBeCopied[copycats[i]].length;j++) {
+                if (aavePositions(copycats[i]).upkeepNeeded(walletsToBeCopied[copycats[i]][j])) {
+                upkeepNeeded = true;
+                //TODO missing token
+                return (upkeepNeeded,[copycats[i], walletsToBeCopied[copycats[i]][j]]);
                 }
             }
         }
     }
 
-    function performUpkeep(
-        bytes calldata /* performData */
-    ) external override {
-        address[] copycats = performData[0];
+    function performUpkeep(bytes calldata performData) external override {
         updateAave(performData[0], performData[1], performData[2]);
     }
 }
