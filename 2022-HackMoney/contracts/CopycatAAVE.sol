@@ -15,7 +15,9 @@ contract CopycatAAVE {
     mapping(address => mapping(address => IUiPoolDataProviderV3.UserReserveData))
         private prevUserReserves;
 
-    constructor() {}
+    function addWallet(address wallet){
+        
+    }
 
     function upkeepNeeded(address copied) public view returns (bool) {
         IPoolAddressesProvider poolProvider = pool.ADDRESSES_PROVIDER();
