@@ -16,7 +16,7 @@ contract CopycatAAVE {
     mapping(address => mapping(address => IUiPoolDataProviderV3.UserReserveData))
         private prevUserReserves;
 
-		constructor() public {
+		constructor() {
 			pool = IPool(0x794a61358D6845594F94dc1DB02A252b5b4814aD);
 			poolDataProvider = IUiPoolDataProviderV3(0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654);
 			walletBalanceProvider = WalletBalanceProvider(0xBc790382B3686abffE4be14A030A96aC6154023a);
@@ -78,7 +78,8 @@ contract CopycatAAVE {
     ) public payable returns (bool) {
         IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
         // no idea what is the second return value
-        (userReserveData, uint256) = poolDataProvider.getUserReservesData(
+				uint256 u;
+        (userReserveData, u) = poolDataProvider.getUserReservesData(
             pool.ADDRESSES_PROVIDER(),
             copied
         );
@@ -98,7 +99,7 @@ contract CopycatAAVE {
         }
 
         IUiPoolDataProviderV3.UserReserveData memory walletReserveData;
-        (userReserveData, uint256) = poolDataProvider.getUserReservesData(
+				(userReserveData, u) = poolDataProvider.getUserReservesData(
             pool.ADDRESSES_PROVIDER(),
             address(this)
         );
@@ -137,7 +138,7 @@ contract CopycatAAVE {
                 token,
                 walletReserveData.scaledATokenBalance -
                     (balance * newUserReserveData.scaledATokenBalance) /
-                    walletBalanceProvider.balanceOf(copied, token)
+                    walletBalanceProvider.balanceOf(copied, token), address(this)
             );
         } else if (
             walletReserveData.scaledATokenBalance /
@@ -152,7 +153,7 @@ contract CopycatAAVE {
                     newUserReserveData.scaledATokenBalance) /
                     (walletBalanceProvider.balanceOf(copied, token) +
                         newUserReserveData.scaledATokenBalance)) -
-                    walletReserveData.scaledATokenBalance
+                    walletReserveData.scaledATokenBalance, address(this), 0
             );
         }
 
@@ -175,7 +176,7 @@ contract CopycatAAVE {
 						walletReserveData.scaledVariableDebt >
 						newPos
 				) {
-						pool.repay(token, walletReserveData - newPos, 2, address(this));
+						pool.repay(token, walletReserveData.scaledVariableDebt - newPos, 2, address(this));
 				} else if (
 						walletReserveData.scaledVariableDebt <
 						newPos
@@ -183,7 +184,7 @@ contract CopycatAAVE {
 						pool.borrow(token, newPos - walletReserveData.scaledVariableDebt, 2, 0, address(this));
 				}
 
-				uint256 newPos = (getCurrentStableBorrowPrice(address(this), token) - (getCurrentStableBorrowPrice(copied, token) * getTotalCollateralPrice(address(this)) / getTotalCollateralPrice(copied)))
+				newPos = (getCurrentStableBorrowPrice(address(this), token) - (getCurrentStableBorrowPrice(copied, token) * getTotalCollateralPrice(address(this)) / getTotalCollateralPrice(copied)))
 					* getCurrentStableBorrow(address(this), token)
 					/ getCurrentStableBorrowPrice(address(this), token);
 
@@ -209,7 +210,8 @@ contract CopycatAAVE {
 			uint256 total = 0;
 			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 			// no idea what is the second return value
-			(userReserveData, uint256) = poolDataProvider.getUserReservesData(
+			uint256 u;
+			(userReserveData, u) = poolDataProvider.getUserReservesData(
 					pool.ADDRESSES_PROVIDER(),
 					addr
 			);
@@ -225,7 +227,8 @@ contract CopycatAAVE {
 		function getCurrentStableBorrow(address addr,  address token) private view returns (uint256) {
 			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 			// no idea what is the second return value
-			(userReserveData, uint256) = poolDataProvider.getUserReservesData(
+			uint256 u;
+			(userReserveData, u) = poolDataProvider.getUserReservesData(
 					pool.ADDRESSES_PROVIDER(),
 					addr
 			);
@@ -245,7 +248,8 @@ contract CopycatAAVE {
 
 			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 			// no idea what is the second return value
-			(userReserveData, uint256) = poolDataProvider.getUserReservesData(
+			uint256 u;
+			(userReserveData, u) = poolDataProvider.getUserReservesData(
 					pool.ADDRESSES_PROVIDER(),
 					addr
 			);
@@ -261,7 +265,8 @@ contract CopycatAAVE {
 		function getCurrentVariableBorrow(address addr,  address token) private view returns (uint256) {
 			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 			// no idea what is the second return value
-			(userReserveData, uint256) = poolDataProvider.getUserReservesData(
+			uint256 u;
+			(userReserveData, u) = poolDataProvider.getUserReservesData(
 					pool.ADDRESSES_PROVIDER(),
 					addr
 			);
@@ -281,7 +286,8 @@ contract CopycatAAVE {
 
 			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 			// no idea what is the second return value
-			(userReserveData, uint256) = poolDataProvider.getUserReservesData(
+			uint256 u;
+			(userReserveData, u) = poolDataProvider.getUserReservesData(
 					pool.ADDRESSES_PROVIDER(),
 					addr
 			);
