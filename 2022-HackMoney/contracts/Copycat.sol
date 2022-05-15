@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.0;
 
+import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./CopycatAAVE.sol";
 import "./CopycatUniswap.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
