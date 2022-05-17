@@ -12,68 +12,65 @@ contract Copycat is KeeperCompatibleInterface {
     uint256 private maxGas = 1000;
     address[] private copycats;
     mapping(address => mapping(address => uint256)) feeBalances;
-    mapping(address => mapping(address => uint256)) private balances;
+    mapping(address => mapping(address => Wallet)) private balances;
     mapping(address => address[]) private walletsToBeCopied;
     mapping(address => CopycatAAVE) private aavePositions;
 
     constructor() {}
 
-    function deposit(address wallet) public payable returns (uint256) {
-        require(balances[msg.sender][wallet]>0, "You are not following this wallet");
-        balances[msg.sender][wallet] += msg.value;
-        return balances[msg.sender][wallet];
+    struct Wallet {
+        uint value;
+        bool exists;
     }
 
-    function depositFee(address wallet) public payable returns (uint256) {
-        require(balances[msg.sender][wallet]>0, "You are not following this wallet");
+    modifier isFollowing (address wallet) {
+        require(balances[msg.sender][wallet].exists, "You are not following this wallet");
+        _;
+    }
+
+    function deposit(address wallet) external payable isFollowing(wallet){
+        balances[msg.sender][wallet].value += msg.value;
+    }
+
+    function depositFee(address wallet) external payable isFollowing(wallet){
         feeBalances[msg.sender][wallet] += msg.value;
-        return feeBalances[msg.sender][wallet];
     }
 
-    function withdraw(uint256 amount, address wallet) public returns (uint256) {
-        require(
-            amount <= balances[msg.sender][wallet],
-            "Amount exceeds balance"
-        );
-        balances[msg.sender][wallet] -= amount;
-        payable(msg.sender).transfer(amount);
-        return balances[msg.sender][wallet];
+    function withdraw(uint256 amount, address wallet) external isFollowing(wallet) {
+        require( amount <= balances[msg.sender][wallet].value, "Amount exceeds balance");
+        balances[msg.sender][wallet].value -= amount;
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "There was an error! Transfer failed.");
     }
 
-    function withdrawFee(uint256 amount, address wallet)
-        public
-        returns (uint256)
-    {
-        require(
-            amount <= feeBalances[msg.sender][wallet],
-            "Amount exceeds balance"
-        );
+    function withdrawFee(uint256 amount, address wallet) external isFollowing(wallet){
+        require( amount <= feeBalances[msg.sender][wallet], "Amount exceeds balance");
         feeBalances[msg.sender][wallet] -= amount;
-        payable(msg.sender).transfer(amount);
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "There was an error! Transfer failed.");
+    }
+
+    function balance(address wallet) external view isFollowing(wallet) returns (uint256) {
+        return balances[msg.sender][wallet].value;
+    }
+
+    function feeBalance(address wallet) external view isFollowing(wallet) returns (uint256) {
         return feeBalances[msg.sender][wallet];
     }
 
-    function balance(address wallet) public view returns (uint256) {
-        require(balances[msg.sender][wallet]>0, "You are not following this wallet");
-        return balances[msg.sender][wallet];
-    }
-
-    function feeBalance(address wallet) public view returns (uint256) {
-        require(balances[msg.sender][wallet]>0, "You are not following this wallet");
-        return feeBalances[msg.sender][wallet];
-    }
-
-    function addWalletToCopycat(address wallet) public {
-        require(balances[msg.sender][wallet]<=0, "You are already following this wallet");
+    function addWalletToCopycat(address wallet) external {
+        require(balances[msg.sender][wallet].value<=0, "You are already following this wallet");
         if (walletsToBeCopied[msg.sender].length == 0) {
             aavePositions[msg.sender] = new CopycatAAVE();
         }
 
+        balances[msg.sender][wallet] = Wallet(0, true);
+        feeBalances[msg.sender][wallet] = 0;
         aavePositions[msg.sender].addWallet(wallet);
         walletsToBeCopied[msg.sender].push(wallet);
     }
 
-    function getAddressesBeingCopied() public view returns (address[] memory) {
+    function getAddressesBeingCopied() external view returns (address[] memory) {
         return walletsToBeCopied[msg.sender];
     }
 
@@ -81,7 +78,7 @@ contract Copycat is KeeperCompatibleInterface {
         address copycat,
         address wallet,
         address token
-    ) private view returns (bool success) {
+    ) private returns (bool success) {
         bool found = false;
         //TODO do this with mapping
         for (uint256 i = 0; i < walletsToBeCopied[copycat].length; i++) {
@@ -90,10 +87,10 @@ contract Copycat is KeeperCompatibleInterface {
                 break;
             }
         }
-        require(balances[copycat][wallet] > 0, "Provide amount to copy");
+        require(balances[copycat][wallet].value > 0, "Provide amount to copy");
         require(feeBalances[copycat][wallet] > gasleft(), "Provide amount to pay fees");
 
-        if (aavePositions[copycat].update(wallet,token,balances[copycat][wallet])) {
+        if (aavePositions[copycat].update(wallet,token,balances[copycat][wallet].value)) {
             payable(msg.sender).transfer(fee); //TODO pay gas fees
             return true;
         }

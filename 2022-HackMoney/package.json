@@ -50,7 +50,8 @@
     "console": "hardhat console",
     "flatten": "hardhat flatten",
     "node": "hardhat node",
-    "run": "hardhat run"
+    "run": "hardhat run",
+    "htest": "hardhat test"
   },
   "eslintConfig": {
     "extends": [

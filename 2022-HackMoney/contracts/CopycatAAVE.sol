@@ -19,7 +19,7 @@ contract CopycatAAVE {
 		constructor() {
 			pool = IPool(0x794a61358D6845594F94dc1DB02A252b5b4814aD);
 			poolDataProvider = IUiPoolDataProviderV3(0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654);
-			walletBalanceProvider = WalletBalanceProvider(0xBc790382B3686abffE4be14A030A96aC6154023a);
+			walletBalanceProvider = WalletBalanceProvider(payable(0xBc790382B3686abffE4be14A030A96aC6154023a));
 		}
 
     function addWallet(address wallet) public {
