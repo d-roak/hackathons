@@ -7,6 +7,7 @@ import { networkParams } from "../../networks"
 import { toHex } from "../../utils"
 import SelectWalletModal from '../../auth/AuthModal'
 import { useDisclosure } from '@chakra-ui/react'
+import { connectors } from '../../auth/Connectors'
 
 const networks = {
 	0x0539: {
@@ -31,23 +32,32 @@ export default function Header() {
 		library,
 		chainId,
 		active,
+		activate,
 		deactivate
 	} = useWeb3React()
 
 	const [network, setNetwork] = useState(chainId)
-	const handleNetwork = (chain: any) => {
-		const id = Number(chain)
-		setNetwork(id)
-		switchNetwork()
+	if(window.localStorage.getItem("active") && !active) {
+		let connectorType = window.localStorage.getItem("provider");
+		if(connectorType != null && connectorType !== "") {
+			activate(connectors[connectorType as keyof typeof connectors])
+		};
 	}
 
-  const switchNetwork = async () => {
+	const handleNetwork = (chain: any) => {
+		const id = Number(chain)
+		switchNetwork(id)
+	}
+
+  const switchNetwork = async (network:number) => {
     try {
-			if(network === -1) return
+			if(!network || network === -1) return
+			console.log(network)
       await library.provider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: toHex(network) }]
       })
+			setNetwork(network)
     } catch (switchError: any) {
       if (switchError.code === 4902) {
         try {
@@ -63,7 +73,8 @@ export default function Header() {
 	}
 
   const refreshState = () => {
-    window.localStorage.setItem("provider", "")
+		window.localStorage.removeItem("active")
+		window.localStorage.removeItem("provider")
     setNetwork(-1)
   }
 
@@ -101,9 +112,9 @@ export default function Header() {
 										<Popover.Button
 											className='group bg-gray-900 text-gray-400 px-4 py-2 rounded-xl inline-flex items-center text-base font-medium focus:outline-none'
 										>
-											<img src={networks[network? network as keyof typeof networks: 1337].icon} alt='icon' className='flex-shrink-0 h-6 w-6'/>
+											<img src={networks[network?network as keyof typeof networks:1337].icon} alt='icon' className='flex-shrink-0 h-6 w-6'/>
 											<div className="ml-4">
-												<p className="text-base font-medium text-gray-400">{networks[network? network as keyof typeof networks: 1337].name}</p>
+												<p className="text-base font-medium text-gray-400">{networks[network?network as keyof typeof networks:1337].name}</p>
 											</div>
 											<ChevronDownIcon
 												className={classNames(

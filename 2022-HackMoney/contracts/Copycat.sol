@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./CopycatAAVE.sol";
 import "./CopycatUniswap.sol";
-import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
 contract Copycat is KeeperCompatibleInterface {
     // no floats 0.3% = 0.0003 = 3 * 10^-5 = 3 / 10^5

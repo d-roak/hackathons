@@ -18,7 +18,7 @@ const walletlink = new WalletLinkConnector({
 });
 
 export const connectors = {
-  injected: injected,
-  walletConnect: walletconnect,
-  coinbaseWallet: walletlink
+  'injected': injected,
+  'walletConnect': walletconnect,
+  'coinbaseWallet': walletlink
 };

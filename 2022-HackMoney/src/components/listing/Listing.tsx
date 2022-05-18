@@ -1,12 +1,22 @@
+import { useWeb3React } from '@web3-react/core';
+import { Contract } from 'ethers';
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Copycat from '../../artifacts/contracts/Copycat.sol/Copycat.json'
 
 function Listing() {
+	const {
+		library,
+		chainId,
+		account,
+	} = useWeb3React();
+
   const [active, setActive] = useState(false)
   const [height, setHeight] = useState('0px')
   const [rotate, setRotate] = useState('transform duration-700 ease rotate-180')
 
 	const contentSpace = useRef<HTMLDivElement>(null)
+	let copiedWallets:any[] = []
 
   function toggleAccordion() {
     setActive((prevState) => !prevState)
@@ -14,6 +24,15 @@ function Listing() {
     setHeight(active ? '0px' : `${contentSpace.current.scrollHeight}px`)
     setRotate(active ? 'transform duration-700 ease rotate-180' : 'transform duration-700 ease')
   }
+
+	async function getWallets() {
+		const contractAddr = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
+		copiedWallets = await contract.getAddressesBeingCopied({from: account})
+	}
+
+	getWallets()
+	console.log(copiedWallets)
 
 	return (
 		<>
@@ -34,7 +53,7 @@ function Listing() {
 						onClick={toggleAccordion}
 					>
 						<p className="inline-block text-footnote light">Title</p>
-						<svg data-accordion-icon className={`${rotate} inline-block w-6 h-6`} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+						<svg data-accordion-icon className={`${rotate} inline-block w-6 h-6`} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
 					</button>
 					<div
 						ref={contentSpace}

@@ -37,7 +37,7 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
             <Button
               variant="outline"
               onClick={() => {
-                activate(connectors.coinbaseWallet);
+                activate(connectors['coinbaseWallet']);
                 setProvider("coinbaseWallet");
                 closeModal();
               }}
@@ -57,7 +57,7 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
             <Button
               variant="outline"
               onClick={() => {
-                activate(connectors.walletConnect);
+                activate(connectors['walletConnect']);
                 setProvider("walletConnect");
                 closeModal();
               }}
@@ -77,7 +77,7 @@ export default function SelectWalletModal({ isOpen, closeModal }) {
             <Button
               variant="outline"
               onClick={() => {
-                activate(connectors.injected);
+                activate(connectors['injected']);
                 setProvider("injected");
                 closeModal();
               }}
