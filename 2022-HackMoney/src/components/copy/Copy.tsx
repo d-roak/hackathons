@@ -1,9 +1,10 @@
 import { Contract } from 'ethers'
 import Copycat from '../../artifacts/contracts/Copycat.sol/Copycat.json'
 import { useWeb3React } from '@web3-react/core';
+import { useNavigate } from 'react-router-dom';
 
 function Copy() {
-
+	const navigate = useNavigate()
 	const {
 		library,
 		account,
@@ -17,6 +18,7 @@ function Copy() {
 		const amount = e.target.elements.amount.value
 		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
 		await contract.addWalletToCopycat(address, {from: account})
+		navigate('/listing')
   }
 
 	return (
