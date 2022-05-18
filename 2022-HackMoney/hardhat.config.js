@@ -20,6 +20,7 @@ module.exports = {
   defaultNetwork: "localhost",
   networks: {
     localhost: {
+			url: "http://localhost:7545",
     },
     rinkeby: {
       url: "https://eth-rinkeby.alchemyapi.io/v2/123abc123abc123abc123abc123abcde",

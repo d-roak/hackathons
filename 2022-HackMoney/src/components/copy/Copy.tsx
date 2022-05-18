@@ -6,22 +6,17 @@ function Copy() {
 
 	const {
 		library,
-		chainId,
 		account,
 	} = useWeb3React();
 
   async function onSubmit(e: any) {
 		e.preventDefault()
-		console.log(e)
-		const addr = e.target.elements.address.value
-		console.log(addr)
-		//const address = "0xdf3e18d64bc6a983f673ab319ccae4f1a57c7097";
-		const contractAddr = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+		const contractAddr = "0x3b2D802a7257dAE6cC111D7dE0407223D59151e2"
 		const address = e.target.elements.address.value
 		const token = e.target.elements.token.value
 		const amount = e.target.elements.amount.value
-		//const contract = new Contract(contractAddr, Copycat.abi, library.getSigner)
-		//await contract.addWalletToCopycat(address, {from: account})
+		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
+		await contract.addWalletToCopycat(address, {from: account})
   }
 
 	return (
