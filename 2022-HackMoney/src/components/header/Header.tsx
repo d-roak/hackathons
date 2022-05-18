@@ -1,11 +1,5 @@
 import { Fragment, useState } from 'react'
 import { Popover, Transition } from '@headlessui/react'
-import {
-  BookmarkAltIcon,
-  CalendarIcon,
-  ShieldCheckIcon,
-  SupportIcon,
-} from '@heroicons/react/outline'
 import { Link } from "react-router-dom"
 import { ChevronDownIcon } from '@heroicons/react/solid'
 import { useWeb3React } from '@web3-react/core'
@@ -14,27 +8,18 @@ import { toHex } from "../../utils"
 import SelectWalletModal from '../../auth/AuthModal'
 import { useDisclosure } from '@chakra-ui/react'
 
-const networks = [
-  {
-    name: 'Help Center',
-    description: 'Get all of your questions answered in our forums or contact support.',
-    href: '#',
-    icon: SupportIcon,
+const networks = {
+	0x0539: {
+    name: 'Localhost',
+    chain: 0x539,
+    icon: 'ethereum.png',
   },
-  {
-    name: 'Guides',
-    description: 'Learn how to maximize our platform to get the most out of it.',
-    href: '#',
-    icon: BookmarkAltIcon,
+  0x13881: {
+    name: 'Polygon Mumbai',
+  	chain: '0x13881',
+    icon: 'polygon-matic-logo.97ff139c.svg',
   },
-  {
-    name: 'Events',
-    description: 'See what meet-ups and other events we might be planning near you.',
-    href: '#',
-    icon: CalendarIcon,
-  },
-  { name: 'Security', description: 'Understand how we take your privacy seriously.', href: '#', icon: ShieldCheckIcon },
-]
+}
 
 function classNames(...classes:any[]) {
   return classes.filter(Boolean).join(' ')
@@ -50,8 +35,8 @@ export default function Header() {
 	} = useWeb3React()
 
 	const [network, setNetwork] = useState(chainId)
-	const handleNetwork = (e: any) => {
-		const id = Number(e.target.value)
+	const handleNetwork = (chain: any) => {
+		const id = Number(chain)
 		setNetwork(id)
 		switchNetwork()
 	}
@@ -116,7 +101,10 @@ export default function Header() {
 										<Popover.Button
 											className='group bg-gray-900 text-gray-400 px-4 py-2 rounded-xl inline-flex items-center text-base font-medium focus:outline-none'
 										>
-											<span>Polygon</span>
+											<img src={networks[network? network as keyof typeof networks: 1337].icon} alt='icon' className='flex-shrink-0 h-6 w-6'/>
+											<div className="ml-4">
+												<p className="text-base font-medium text-gray-400">{networks[network? network as keyof typeof networks: 1337].name}</p>
+											</div>
 											<ChevronDownIcon
 												className={classNames(
 													open ? 'text-gray-600' : 'text-gray-400',
@@ -135,21 +123,16 @@ export default function Header() {
 											leaveFrom="opacity-100 translate-y-0"
 											leaveTo="opacity-0 translate-y-1"
 										>
-											<Popover.Panel className="absolute z-10 left-1/2 transform -translate-x-1/2 mt-3 px-2 w-screen max-w-md sm:px-0">
+											<Popover.Panel className="absolute z-10 left-1/2 transform -translate-x-1/2 mt-3 px-2 w-screen max-w-sm sm:px-0">
 												<div className="rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden">
-													<div className="relative grid gap-6 bg-white px-5 py-6 sm:gap-8 sm:p-8">
-														{networks.map((item) => (
-															<a
-																key={item.name}
-																href={item.href}
-																className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
-															>
-																<item.icon className="flex-shrink-0 h-6 w-6 text-indigo-600" aria-hidden="true" />
+													<div className="relative grid gap-6 bg-gray-900 px-5 py-6">
+														{Object.values(networks).map((item) => (
+															<button onClick={() => handleNetwork(item.chain)} className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-800">
+																<img src={item.icon} alt='icon' className='flex-shrink-0 h-6 w-6'/>
 																<div className="ml-4">
-																	<p className="text-base font-medium text-gray-900">{item.name}</p>
-																	<p className="mt-1 text-sm text-gray-500">{item.description}</p>
+																	<p className="text-base font-medium text-gray-400">{item.name}</p>
 																</div>
-															</a>
+															</button>
 														))}
 													</div>
 												</div>
