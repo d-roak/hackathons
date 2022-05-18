@@ -2,6 +2,7 @@ import { Contract } from 'ethers'
 import Copycat from '../../artifacts/contracts/Copycat.sol/Copycat.json'
 import { useWeb3React } from '@web3-react/core';
 import { useNavigate } from 'react-router-dom';
+import { contractAddr } from '../../networks';
 
 function Copy() {
 	const navigate = useNavigate()
@@ -12,7 +13,6 @@ function Copy() {
 
   async function onSubmit(e: any) {
 		e.preventDefault()
-		const contractAddr = "0x3b2D802a7257dAE6cC111D7dE0407223D59151e2"
 		const address = e.target.elements.address.value
 		const token = e.target.elements.token.value
 		const amount = e.target.elements.amount.value

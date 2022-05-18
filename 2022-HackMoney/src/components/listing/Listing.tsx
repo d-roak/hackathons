@@ -3,6 +3,7 @@ import { Contract } from 'ethers';
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Copycat from '../../artifacts/contracts/Copycat.sol/Copycat.json'
+import { contractAddr } from '../../networks';
 
 function Listing() {
 	const {
@@ -25,7 +26,6 @@ function Listing() {
 
 	useEffect(() => {
 		if(!library) return
-		const contractAddr = "0x3b2D802a7257dAE6cC111D7dE0407223D59151e2"
 		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
 		contract.getAddressesBeingCopied().then((d:any) => setWallets(d))
 	}, [library])
