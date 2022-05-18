@@ -3,10 +3,8 @@ import { Popover, Transition } from '@headlessui/react'
 import {
   BookmarkAltIcon,
   CalendarIcon,
-  MenuIcon,
   ShieldCheckIcon,
   SupportIcon,
-  XIcon,
 } from '@heroicons/react/outline'
 import { Link } from "react-router-dom"
 import { ChevronDownIcon } from '@heroicons/react/solid'
@@ -99,7 +97,7 @@ export default function Header() {
             </Link>
           </div>
 
-					{active ? (
+					{active ? (<></>):(<></>)}
           <Popover.Group as="nav" className="bg-gray-900 px-4 py-2 border border-transparent rounded-xl hidden md:flex space-x-10">
 						<Link className="text-base font-medium text-gray-500 hover:text-gray-900" to={"/listing"}>
 							Listing
@@ -108,7 +106,7 @@ export default function Header() {
 							Copy
 						</Link>
           </Popover.Group>
-					):(<></>)}
+					
 
           <div className="hidden md:flex items-center justify-end md:flex-1 lg:w-0">
 						<Popover.Group>	
