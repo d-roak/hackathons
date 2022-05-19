@@ -24,7 +24,10 @@ module.exports = {
     },
     rinkeby: {
       url: "https://eth-rinkeby.alchemyapi.io/v2/123abc123abc123abc123abc123abcde",
-    }
+    },
+		mumbai: {
+			url: "https://rpc-mumbai.maticvigil.com/v1/cbf49a46f64f11243f0d05507ecb0be9484fdcb6",
+		}
   },
   solidity: {
     compilers: [

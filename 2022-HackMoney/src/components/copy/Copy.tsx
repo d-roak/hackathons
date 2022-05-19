@@ -1,4 +1,4 @@
-import { Contract } from 'ethers'
+import { BigNumber, Contract, utils } from 'ethers'
 import Copycat from '../../artifacts/contracts/Copycat.sol/Copycat.json'
 import { useWeb3React } from '@web3-react/core';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,8 @@ function Copy() {
 		const amount = e.target.elements.amount.value
 		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
 		await contract.addWalletToCopycat(address, {from: account})
+		await contract.deposit(address, {from: account, value: utils.parseEther(String(amount*0.9))})
+		await contract.depositFee(address, {from: account, value: utils.parseEther(String(amount*0.1))})
 		navigate('/listing')
   }
 
@@ -40,7 +42,7 @@ function Copy() {
 					</div>
 					<div className="mb-6">
 						<label htmlFor="amount" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Amount</label>
-						<input type="number" autoComplete='off' name="amount" id="amount" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Amount" required />
+						<input type="number" step=".01" autoComplete='off' name="amount" id="amount" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Amount" required />
 					</div>
 
 					<button type="submit" className="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>

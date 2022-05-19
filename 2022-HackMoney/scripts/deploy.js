@@ -1,8 +1,13 @@
 const main = async () => {
-    const contractFactory = await hre.ethers.getContractFactory('Copycat');
-    const contract = await contractFactory.deploy();
+    let contractFactory = await hre.ethers.getContractFactory('Copycat');
+    let contract = await contractFactory.deploy();
     await contract.deployed();
     console.log("Copycat deployed to %s", contract.address);
+
+    contractFactory = await hre.ethers.getContractFactory('CopycatAAVE');
+    contract = await contractFactory.deploy();
+    await contract.deployed();
+    console.log("CopycatAAVE deployed to %s", contract.address);
 
 }
 

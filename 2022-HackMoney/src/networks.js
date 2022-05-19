@@ -1,4 +1,4 @@
-export const contractAddr = "0x3b2D802a7257dAE6cC111D7dE0407223D59151e2"
+export const contractAddr = "0x5B42f8d5CC8c5E96c98C54D785a374C76a101853"
 
 export const networkParams = {
 	"0x539": {
