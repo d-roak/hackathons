@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./CopycatAAVE.sol";
-import "./CopycatUniswap.sol";
 
 contract Copycat is KeeperCompatibleInterface {
     // no floats 0.3% = 0.0003 = 3 * 10^-5 = 3 / 10^5
@@ -58,8 +57,8 @@ contract Copycat is KeeperCompatibleInterface {
     }
 
     function addWalletToCopycat(address wallet) external {
-        require(balances[msg.sender][wallet].value<=0, "You are already following this wallet");
-        if (walletsToBeCopied[msg.sender].length == 0) {
+				require(!balances[msg.sender][wallet].exists, "You are already following this wallet");
+				if (walletsToBeCopied[msg.sender].length == 0) {
             aavePositions[msg.sender] = new CopycatAAVE();
         }
 

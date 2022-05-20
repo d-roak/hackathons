@@ -1,5 +1,5 @@
 import { useWeb3React } from '@web3-react/core';
-import { Contract } from 'ethers';
+import { Contract, utils } from 'ethers';
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Copycat from '../../artifacts/contracts/Copycat.sol/Copycat.json'
@@ -14,6 +14,8 @@ function Listing() {
   const [height, setHeight] = useState('0px')
   const [rotate, setRotate] = useState('transform duration-700 ease rotate-180')
 	const [wallets, setWallets] = useState([])
+	const [balances, setBalances] = useState({})
+	const [feeBalances, setFeeBalances] = useState({})
 
 	const contentSpace = useRef<HTMLDivElement>(null)
 
@@ -27,8 +29,24 @@ function Listing() {
 	useEffect(() => {
 		if(!library) return
 		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
-		contract.getAddressesBeingCopied().then((d:any) => setWallets(d))
-	}, [library])
+		contract.getAddressesBeingCopied().then((d:any) => {
+			setWallets(d)
+			d.forEach((addr:string) => {
+				contract.balance(addr).then((b:any) => {
+					setBalances({
+						...balances,
+						[addr]: utils.formatEther(b)
+					})
+				})
+				contract.feeBalance(addr).then((b:any) => {
+					setFeeBalances({
+						...feeBalances,
+						[addr]: utils.formatEther(b)
+					})
+				})
+			})
+		})
+	}, [balances, feeBalances, library])
 
 	return (
 		<>
@@ -59,9 +77,10 @@ function Listing() {
 								className="overflow-hidden transition-max-height duration-700 ease-in-out
 									text-gray-400 bg-gray-900 border border-gray-700 border-b-0"
 							>
-								<p className="text-gray-400 mb-2 p-5">
-									Content
-								</p>
+								<div className="text-gray-400 p-5">
+									<p>Balance: {balances[item]} MATIC</p>
+									<p>Fee Balance: {feeBalances[item]} MATIC</p>
+								</div>
 							</div>
 						</>
 					))}

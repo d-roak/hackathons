@@ -4,11 +4,12 @@ const main = async () => {
     await contract.deployed();
     console.log("Copycat deployed to %s", contract.address);
 
+		/* NO NEED
     contractFactory = await hre.ethers.getContractFactory('CopycatAAVE');
     contract = await contractFactory.deploy();
     await contract.deployed();
     console.log("CopycatAAVE deployed to %s", contract.address);
-
+		*/
 }
 
 const runMain = async () => {

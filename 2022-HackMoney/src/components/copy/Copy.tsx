@@ -17,10 +17,11 @@ function Copy() {
 		const token = e.target.elements.token.value
 		const amount = e.target.elements.amount.value
 		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
-		await contract.addWalletToCopycat(address, {from: account})
+		//await contract.addWalletToCopycat(address, {from: account})
+		console.log(utils.parseEther(amount))
 		await contract.deposit(address, {from: account, value: utils.parseEther(String(amount*0.9))})
 		await contract.depositFee(address, {from: account, value: utils.parseEther(String(amount*0.1))})
-		navigate('/listing')
+		//navigate('/listing')
   }
 
 	return (
