@@ -35,13 +35,13 @@ function Listing() {
 				contract.balance(addr).then((b:any) => {
 					setBalances({
 						...balances,
-						[addr]: utils.formatEther(b)
+						[addr]: (+utils.formatEther(b)).toFixed(4)
 					})
 				})
 				contract.feeBalance(addr).then((b:any) => {
 					setFeeBalances({
 						...feeBalances,
-						[addr]: utils.formatEther(b)
+						[addr]: (+utils.formatEther(b)).toFixed(4)
 					})
 				})
 			})

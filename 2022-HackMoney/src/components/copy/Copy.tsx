@@ -1,4 +1,4 @@
-import { BigNumber, Contract, utils } from 'ethers'
+import { Contract, utils } from 'ethers'
 import Copycat from '../../artifacts/contracts/Copycat.sol/Copycat.json'
 import { useWeb3React } from '@web3-react/core';
 import { useNavigate } from 'react-router-dom';
@@ -17,11 +17,14 @@ function Copy() {
 		const token = e.target.elements.token.value
 		const amount = e.target.elements.amount.value
 		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
-		//await contract.addWalletToCopycat(address, {from: account})
-		console.log(utils.parseEther(amount))
+		try {
+			await contract.addWalletToCopycat(address, {from: account})
+		} catch(e) {
+			console.log(e)
+		}
 		await contract.deposit(address, {from: account, value: utils.parseEther(String(amount*0.9))})
 		await contract.depositFee(address, {from: account, value: utils.parseEther(String(amount*0.1))})
-		//navigate('/listing')
+		navigate('/listing')
   }
 
 	return (
