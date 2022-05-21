@@ -47,18 +47,21 @@ function Listing() {
 				})
 			})
 		})
-		setQuoteRate({
-			...quoteRate, 
-			MATIC: getUSD("MATIC")
-		});
+		if(!quoteRate["MATIC" as keyof typeof quoteRate]){
+			getUSD("MATIC").then(r => {
+				setQuoteRate({
+					...quoteRate,
+					MATIC: r
+				});
+			})
+		}
 	}, [balances, feeBalances, library, quoteRate])
 
 	const getUSD = async (token:string) => {
 		const response = await fetch('https://api.covalenthq.com/v1/pricing/tickers/?quote-currency=USD&format=JSON&tickers=' + token + '&key=ckey_be6ce18e2e8743df94fe7c614eb');
-		const myJson = await response.json();
-		let res = myJson.items[0].quote_rate;
-		console.log(myJson);
-		console.log(res);
+		const json = await response.json();
+		let res = json.data.items[0].quote_rate;
+		return res;
 	}
 
 	return (
@@ -91,8 +94,8 @@ function Listing() {
 									text-gray-400 bg-gray-900 border border-gray-700 border-b-0"
 							>
 								<div className="text-gray-400 p-5">
-									<p>Balance: {balances[item] + " MATIC ($" + balances[item]*quoteRate["MATIC" as keyof typeof quoteRate] + ")"}</p>
-									<p>Fee Balance: {feeBalances[item] + " MATIC ($" + balances[item]*quoteRate["MATIC" as keyof typeof quoteRate] + ")"}</p>
+									<p>Balance: {balances[item] + " MATIC ($" + (balances[item]*quoteRate["MATIC" as keyof typeof quoteRate]).toFixed(4) + ")"}</p>
+									<p>Fee Balance: {feeBalances[item] + " MATIC ($" + (feeBalances[item]*quoteRate["MATIC" as keyof typeof quoteRate]).toFixed(4) + ")"}</p>
 								</div>
 							</div>
 						</>
