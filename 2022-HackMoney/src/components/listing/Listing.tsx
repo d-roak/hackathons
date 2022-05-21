@@ -97,6 +97,12 @@ function Listing() {
 									<p>Balance: {balances[item] + " MATIC ($" + (balances[item]*quoteRate["MATIC" as keyof typeof quoteRate]).toFixed(4) + ")"}</p>
 									<p>Fee Balance: {feeBalances[item] + " MATIC ($" + (feeBalances[item]*quoteRate["MATIC" as keyof typeof quoteRate]).toFixed(4) + ")"}</p>
 								</div>
+						
+								<div 
+								className="ml-4 mb-5 whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
+								>
+								Withdraw
+							</div>
 							</div>
 						</>
 					))}
