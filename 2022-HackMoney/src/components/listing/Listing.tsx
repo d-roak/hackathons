@@ -33,11 +33,13 @@ function Listing() {
 		contract.getAddressesBeingCopied().then((d:any) => {
 			setWallets(d)
 			d.forEach((addr:string) => {
+				if (balances[addr as keyof typeof balances] !== undefined
+					&& feeBalances[addr as keyof typeof feeBalances] !== undefined) return
 				contract.balance(addr).then((b:any) => {
-					setBalances({
+					setBalances(bal => ({
 						...balances,
 						[addr]: (+utils.formatEther(b)).toFixed(4)
-					})
+					}))
 				})
 				contract.feeBalance(addr).then((b:any) => {
 					setFeeBalances({
@@ -51,7 +53,7 @@ function Listing() {
 			getUSD("MATIC").then(r => {
 				setQuoteRate({
 					...quoteRate,
-					MATIC: r
+					MATIC: r?r:0
 				});
 			})
 		}

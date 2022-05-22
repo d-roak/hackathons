@@ -18,12 +18,15 @@ function Copy() {
 		const amount = e.target.elements.amount.value
 		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
 		try {
-			await contract.addWalletToCopycat(address, token, {from: account, value: utils.parseEther(String(amount*0.9))})
+			let addTxn = await contract.addWalletToCopycat(address, token, {from: account, value: utils.parseEther(String(amount*0.9))})
+			await addTxn.wait()
+			await contract.depositFee(address, {from: account, value: utils.parseEther(String(amount*0.1))})
 		} catch(e:any) {
 			console.log(e)
 			await contract.deposit(address, {from: account, value: utils.parseEther(String(amount*0.9))})
+			await contract.depositFee(address, {from: account, value: utils.parseEther(String(amount*0.1))})
 		}
-		await contract.depositFee(address, {from: account, value: utils.parseEther(String(amount*0.1))})
+
 		navigate('/listing')
   }
 

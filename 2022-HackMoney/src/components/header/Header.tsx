@@ -52,7 +52,6 @@ export default function Header() {
   const switchNetwork = async (network:number) => {
     try {
 			if(!network || network === -1) return
-			console.log(network)
       await library.provider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: toHex(network) }]
@@ -112,9 +111,9 @@ export default function Header() {
 										<Popover.Button
 											className='group bg-gray-900 text-gray-400 px-4 py-2 rounded-xl inline-flex items-center text-base font-medium focus:outline-none'
 										>
-											<img src={networks[network?network as keyof typeof networks:1337].icon} alt='icon' className='flex-shrink-0 h-6 w-6'/>
+											<img src={networks[network?network as keyof typeof networks:80001].icon} alt='icon' className='flex-shrink-0 h-6 w-6'/>
 											<div className="ml-4">
-												<p className="text-base font-medium text-gray-400">{networks[network?network as keyof typeof networks:1337].name}</p>
+												<p className="text-base font-medium text-gray-400">{networks[network?network as keyof typeof networks:80001].name}</p>
 											</div>
 											<ChevronDownIcon
 												className={classNames(
