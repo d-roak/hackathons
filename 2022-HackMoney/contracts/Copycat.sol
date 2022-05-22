@@ -5,8 +5,6 @@ import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 import "./CopycatAAVE.sol";
 
 contract Copycat is KeeperCompatibleInterface {
-    // no floats 0.3% = 0.0003 = 3 * 10^-5 = 3 / 10^5
-    uint256 private fee = 3;
     uint256 private maxGas = 1000;
     address[] private copycats;
     mapping(address => mapping(address => uint256)) feeBalances;
@@ -56,15 +54,15 @@ contract Copycat is KeeperCompatibleInterface {
         return feeBalances[msg.sender][wallet];
     }
 
-    function addWalletToCopycat(address wallet) external {
+    function addWalletToCopycat(address wallet, address token) external payable {
 				require(!balances[msg.sender][wallet].exists, "You are already following this wallet");
 				if (walletsToBeCopied[msg.sender].length == 0) {
             aavePositions[msg.sender] = new CopycatAAVE();
         }
 
-        balances[msg.sender][wallet] = Wallet(0, true);
+        balances[msg.sender][wallet] = Wallet(msg.value, true);
         feeBalances[msg.sender][wallet] = 0;
-        aavePositions[msg.sender].addWallet(wallet);
+        aavePositions[msg.sender].addWallet(wallet, token, msg.value);
         walletsToBeCopied[msg.sender].push(wallet);
     }
 
@@ -76,7 +74,7 @@ contract Copycat is KeeperCompatibleInterface {
         address copycat,
         address wallet,
         address token
-    ) private returns (bool success) {
+    ) public returns (bool success) {
         bool found = false;
         //TODO do this with mapping
         for (uint256 i = 0; i < walletsToBeCopied[copycat].length; i++) {
@@ -89,34 +87,29 @@ contract Copycat is KeeperCompatibleInterface {
         require(feeBalances[copycat][wallet] > gasleft(), "Provide amount to pay fees");
 
         if (aavePositions[copycat].update(wallet,token,balances[copycat][wallet].value)) {
-            payable(msg.sender).transfer(fee); //TODO pay gas fees
             return true;
         }
         return false;
     }
 
     function checkUpkeep(bytes calldata checkData)
-        external
-        view
-        override
-        returns (bool upkeepNeeded, bytes memory performData)
+			external
+			view
+			override
+			returns (bool upkeepNeeded, bytes memory performData)
     {
-        upkeepNeeded = false;
-        for (uint256 i = 0; i < copycats.length; i++) {
-            
-            for (uint256 j = 0;j < walletsToBeCopied[copycats[i]].length;j++) {
-                if(feeBalances[copycats[i]][walletsToBeCopied[copycats[i]][j]] >= fee){
-                
-                    (bool needed, address token) = aavePositions[copycats[i]].upkeepNeeded(walletsToBeCopied[copycats[i]][j]);
-                    if (needed) {
-                        upkeepNeeded = true;
-                        performData = abi.encode([copycats[i], walletsToBeCopied[copycats[i]][j], token]);
-                        return (upkeepNeeded, performData);
-                    }
-                }
-            }
-        }
-        return (upkeepNeeded, abi.encode(address(0)));
+			upkeepNeeded = false;
+			for (uint256 i = 0; i < copycats.length; i++) {
+				for (uint256 j = 0;j < walletsToBeCopied[copycats[i]].length;j++) {
+					(bool needed, address token) = aavePositions[copycats[i]].upkeepNeeded(walletsToBeCopied[copycats[i]][j]);
+					if (needed) {
+							upkeepNeeded = true;
+							performData = abi.encode([copycats[i], walletsToBeCopied[copycats[i]][j], token]);
+							return (upkeepNeeded, performData);
+					}
+				}
+			}
+			return (upkeepNeeded, abi.encode(address(0)));
     }
 
     function performUpkeep(bytes calldata performData) external override {

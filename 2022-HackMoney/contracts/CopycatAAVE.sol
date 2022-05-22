@@ -2,6 +2,7 @@
 pragma solidity >0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
 import {IPoolAddressesProvider} from "@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol";
 import {IAaveOracle} from "@aave/core-v3/contracts/interfaces/IAaveOracle.sol";
@@ -17,14 +18,42 @@ contract CopycatAAVE {
         private prevUserReserves;
 
 		constructor() {
-			pool = IPool(0x794a61358D6845594F94dc1DB02A252b5b4814aD);
-			poolDataProvider = IUiPoolDataProviderV3(0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654);
-			walletBalanceProvider = WalletBalanceProvider(payable(0xBc790382B3686abffE4be14A030A96aC6154023a));
+			pool = IPool(0x1758d4e6f68166C4B2d9d0F049F33dEB399Daa1F);
+			poolDataProvider = IUiPoolDataProviderV3(0x94E9E8876Fd68574f17B2cd7Fa19AA8342fFaF51);
+			walletBalanceProvider = WalletBalanceProvider(payable(0x78baC31Ed73c115EB7067d1AfE75eC7B4e16Df9e));
 		}
 
-    function addWallet(address wallet) public {
-        
-    }
+		function addWallet(address copied, address token, uint256 amount) public {
+			require(prevBalances[copied][token] <= 0, "CopycatAAVE.addWallet: You are already following this wallet");
+
+			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
+			// no idea what is the second return value
+			uint256 u;
+			(userReserveData, u) = poolDataProvider.getUserReservesData(
+					pool.ADDRESSES_PROVIDER(),
+					copied
+			);
+
+			if (userReserveData.length == 0) {
+				prevUserReserves[copied][token] = IUiPoolDataProviderV3.UserReserveData(token, 0, false, 0, 0, 0, 0);
+			} else {
+				for (uint256 i = 0; i < userReserveData.length; i++) {
+					if (userReserveData[i].underlyingAsset == token) {
+						prevUserReserves[copied][token] = userReserveData[i];
+						if(userReserveData[i].scaledATokenBalance >0) {
+							pool.supply(
+								token,
+								(amount * userReserveData[i].scaledATokenBalance) / (walletBalanceProvider.balanceOf(copied, token) + userReserveData[i].scaledATokenBalance),
+								address(this), 0);
+							pool.setUserUseReserveAsCollateral(token, userReserveData[i].usageAsCollateralEnabledOnUser);
+						}
+						break;
+					}
+				}
+			}
+			
+			prevBalances[copied][token] = walletBalanceProvider.balanceOf(copied, token);
+		}
 
     function upkeepNeeded(address copied) public view returns (bool, address) {
         IPoolAddressesProvider poolProvider = pool.ADDRESSES_PROVIDER();
@@ -200,12 +229,13 @@ contract CopycatAAVE {
 						pool.borrow(token, newPos - walletReserveData.principalStableDebt, 1, 0, address(this));
 				}
 
+				prevBalances[copied][token] = walletBalanceProvider.balanceOf(copied, token);
 				prevUserReserves[copied][token] = newUserReserveData;
         return true;
     }
 
 		function getTotalCollateralPrice(address addr) private view returns (uint256) {
-			IAaveOracle oracle = IAaveOracle(0xb023e699F5a33916Ea823A16485e259257cA8Bd1);
+			IAaveOracle oracle = IAaveOracle(0x520D14AE678b41067f029Ad770E2870F85E76588);
 
 			uint256 total = 0;
 			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
@@ -244,7 +274,7 @@ contract CopycatAAVE {
 		}
 
 		function getCurrentStableBorrowPrice(address addr, address token) private view returns (uint256) {
-			IAaveOracle oracle = IAaveOracle(0xb023e699F5a33916Ea823A16485e259257cA8Bd1);
+			IAaveOracle oracle = IAaveOracle(0x520D14AE678b41067f029Ad770E2870F85E76588);
 
 			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 			// no idea what is the second return value
@@ -256,7 +286,9 @@ contract CopycatAAVE {
 
 			for (uint256 i = 0; i < userReserveData.length; i++) {
 					if (userReserveData[i].usageAsCollateralEnabledOnUser) {
+						if (userReserveData[i].underlyingAsset == token) {
 							return oracle.getAssetPrice(userReserveData[i].underlyingAsset) * userReserveData[i].principalStableDebt;
+						}
 					}
 			}
 			return 0;
@@ -282,7 +314,7 @@ contract CopycatAAVE {
 		}
 
 		function getCurrentVariableBorrowPrice(address addr, address token) private view returns (uint256) {
-			IAaveOracle oracle = IAaveOracle(0xb023e699F5a33916Ea823A16485e259257cA8Bd1);
+			IAaveOracle oracle = IAaveOracle(0x520D14AE678b41067f029Ad770E2870F85E76588);
 
 			IUiPoolDataProviderV3.UserReserveData[] memory userReserveData;
 			// no idea what is the second return value
@@ -294,7 +326,9 @@ contract CopycatAAVE {
 
 			for (uint256 i = 0; i < userReserveData.length; i++) {
 					if (userReserveData[i].usageAsCollateralEnabledOnUser) {
+						if (userReserveData[i].underlyingAsset == token) {
 							return oracle.getAssetPrice(userReserveData[i].underlyingAsset) * userReserveData[i].scaledVariableDebt;
+						}
 					}
 			}
 			return 0;

@@ -64,6 +64,22 @@ function Listing() {
 		return res;
 	}
 
+	const withdraw = (addr:string) => async () => {
+		const contract = new Contract(contractAddr, Copycat.abi, library.getSigner())
+		await contract.withdraw(utils.parseEther(balances[addr as keyof typeof balances]), addr).then(() => {
+			setBalances({
+				...balances,
+				[addr]: '0'
+			})
+		})
+		await contract.withdrawFee(utils.parseEther(feeBalances[addr as keyof typeof feeBalances]), addr).then(() => {
+			setFeeBalances({
+				...feeBalances,
+				[addr]: '0'
+			})
+		})
+	}
+
 	return (
 		<>
 			<div className='w-1/2 mt-10 mx-auto'>
@@ -100,7 +116,7 @@ function Listing() {
 						
 								<div 
 								className="ml-4 mb-5 whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
-								>
+								onClick={withdraw(item)}>
 								Withdraw
 							</div>
 							</div>
